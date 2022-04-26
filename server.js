@@ -4,6 +4,7 @@ const fs = require('fs');
 const api = require('./routes');
 const PORT = 3001;
 const app = express();
+const util = require('util');
 // var db = fs.readFile("./db/db.json");
 // var dbjson = JSON.parse(db);
 
@@ -24,8 +25,22 @@ app.get('/notes', (req, res) =>
     res.sendFile(path.join(__dirname, '/public/notes.html'))
 );
 
+// Read/write functions
+const readFile = util.promisify(fs.readFile)
+function readNotes() {
+  return readFile('db/db.json', 'utf-8').then(notes => {
+    let notesArray = [];
+    notesArray = notesArray.concat(JSON.parse(notes));
+    return notesArray;
+  });
+}
+
+app.get('/api/notes', (req, res) => {
+  readNotes().then(notes => res.json(notes)).catch(err => res.status(500).json(err))
+});
+
 // Post a New Note
-app.post('/notes', (req, res) => {
+app.post('/api/notes', (req, res) => {
     console.log(req.body);
   
     const { title, text } = req.body;
@@ -35,7 +50,8 @@ app.post('/notes', (req, res) => {
         title,
         text
       };
-      
+      console.log(NewNote);
+      // fs.writeFileSync(newNote, );
       res.json(`Note added successfully 🚀`);
     } else {
       res.error('Error in adding note');
