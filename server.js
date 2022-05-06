@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const api = require('./routes');
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const app = express();
 const util = require('util');
 // var db = fs.readFile("./db/db.json");
@@ -40,9 +40,7 @@ app.get('/api/notes', (req, res) => {
 });
 
 // Post a New Note
-app.post('/api/notes', (req, res) => {
-    console.log(req.body);
-  
+app.post('/api/notes', (req, res) => {  
     const { title, text } = req.body;
   
     if (req.body) {
@@ -50,9 +48,12 @@ app.post('/api/notes', (req, res) => {
         title,
         text
       };
-      console.log(NewNote);
-      // fs.writeFileSync(newNote, );
-      res.json(`Note added successfully 🚀`);
+      readNotes().then(notes => [... notes, newNote]).then(newArray => {
+        fs.writeFileSync('db/db.json', JSON.stringify(newArray));
+      });
+      res.json({
+        ok:'true'
+      })
     } else {
       res.error('Error in adding note');
     }
