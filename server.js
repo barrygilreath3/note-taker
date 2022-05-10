@@ -5,8 +5,6 @@ const api = require('./routes');
 const PORT = process.env.PORT || 3001;
 const app = express();
 const util = require('util');
-// var db = fs.readFile("./db/db.json");
-// var dbjson = JSON.parse(db);
 
 // Middleware for parsing JSON and urlencoded form data
 app.use(express.json());
@@ -57,6 +55,13 @@ app.post('/api/notes', (req, res) => {
     } else {
       res.error('Error in adding note');
     }
+});
+
+app.delete('/notes/:id', (req, res) => {
+  store
+    .removeNote(req.params.id)
+    .then(() => res.json({ ok: true }))
+    .catch((err) => res.status(500).json(err));
 });
 
 
